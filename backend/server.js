@@ -21,7 +21,13 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || process.env
 const app = express();
 app.disable('x-powered-by');
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-app.use(cors({ origin: process.env.FRONTEND_ORIGIN || 'http://localhost:8501' }));
+const allowedFrontendOrigins = new Set([
+  'http://localhost:8501',
+  'http://127.0.0.1:8501',
+  ...(process.env.FRONTEND_ORIGINS || '').split(','),
+  process.env.FRONTEND_ORIGIN || ''
+].map((origin) => origin.trim()).filter(Boolean));
+app.use(cors({ origin: (origin, callback) => callback(null, !origin || allowedFrontendOrigins.has(origin)) }));
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 app.use((req, _res, next) => { req.body = req.body || {}; next(); });

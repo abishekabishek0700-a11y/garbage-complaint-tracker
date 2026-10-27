@@ -71,6 +71,18 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 Command Prompt activation is `.venv\Scripts\activate.bat`. The app opens at `http://localhost:8501`. If the API uses another address, set `GCT_API_URL` before starting Streamlit, for example `$env:GCT_API_URL = "http://localhost:5000/api"` in PowerShell.
 
+### Deployed frontend and backend
+
+For Streamlit Community Cloud, add this app secret in the app's **Settings > Secrets**:
+
+```toml
+GCT_API_URL = "https://garbage-complaint-tracker.onrender.com/api"
+```
+
+For the Render backend, set `FRONTEND_ORIGINS` to a comma-separated list containing the exact Streamlit Community Cloud origin (scheme and hostname only, with no trailing slash). The backend also allows `http://localhost:8501` and `http://127.0.0.1:8501` for local development. The Streamlit Cloud origin was not included in this repository; use the URL shown in your Streamlit Community Cloud app page, not the GitHub repository URL.
+
+Local development needs no additional setting: the frontend defaults to `http://localhost:5000/api`. An environment variable `GCT_API_URL` takes precedence over Streamlit secrets and the local default.
+
 For temporary development diagnostics, set `$env:GCT_DEBUG_API = "true"` in the frontend PowerShell terminal before running Streamlit. Failed API requests then show the HTTP method, path, status, and safe server message; request bodies, passwords, bearer tokens, and secrets are never displayed. Close the terminal or run `Remove-Item Env:GCT_DEBUG_API` to disable diagnostics.
 
 ## First Admin and Worker Accounts
@@ -96,10 +108,11 @@ These files are intentionally ignored by Git. Back up `backend/storage/` separat
 
 ## API Overview
 
-Base URL: `http://localhost:5000/api`
+Local base URL: `http://localhost:5000/api`  
+Deployed base URL: `https://garbage-complaint-tracker.onrender.com/api`
 
 - `POST /auth/register`, `POST /auth/login`, `GET /auth/me`
-- `GET|POST /complaints`, `GET /complaints/:id`, `GET /complaints/:id/history`
+- `GET|POST /complaints`, `GET /complaints/:id`, `GET /complaints/:id/history`, `DELETE /complaints/:id`
 - `POST /complaints/:id/evidence`, `PATCH /complaints/:id/task`
 - `GET /admin/stats`, `PATCH /admin/complaints/:id/status`, `PATCH /admin/complaints/:id/assign`
 - `GET|POST /admin/workers`, `PATCH /admin/workers/:id`, `GET /admin/feedback`, `GET /admin/audit`, `GET /admin/report.csv`
