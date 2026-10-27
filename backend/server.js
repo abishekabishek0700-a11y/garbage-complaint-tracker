@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { initializeStorage, storageDir } = require('./utils/fileStorage');
+const bootstrapAdminFromEnvironment = require('./utils/bootstrapAdmin');
 const { authenticate, allowRoles } = require('./middleware/authMiddleware');
 const authRoutes = require('./routes/auth');
 const { router: complaintRoutes } = require('./routes/complaints');
@@ -69,7 +70,13 @@ app.use((error, _req, res, _next) => {
 });
 
 const port = Number(process.env.PORT) || 5000;
-initializeStorage().then(() => app.listen(port, () => console.log(`Garbage Complaint Tracker API listening on http://localhost:${port}`)))
-  .catch((error) => { console.error('Could not initialize local storage:', error); process.exit(1); });
+initializeStorage().then(async () => {
+  const adminCreated = await bootstrapAdminFromEnvironment();
+  if (adminCreated) console.log('Bootstrap administrator account created. Remove the BOOTSTRAP_ADMIN variables from the hosting settings when ready.');
+  app.listen(port, () => console.log(`Garbage Complaint Tracker API listening on http://localhost:${port}`));
+}).catch((error) => {
+  console.error('Could not initialize local storage or admin setup:', error.message);
+  process.exit(1);
+});
 
 module.exports = app;

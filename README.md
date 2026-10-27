@@ -91,6 +91,18 @@ Create the first administrator only from `backend` using `npm run create-admin`.
 
 To set or change the password for an existing administrator, run `npm run set-admin-password` from the `backend` folder. Enter the admin email, then the new password twice at the hidden prompts. The command only updates the password hash of a matching existing admin; it does not create, promote, or remove accounts. If the admin does not exist yet, use `npm run create-admin` first.
 
+### Initial admin on Render without Shell
+
+For a deployment where Shell is unavailable, add these protected environment variables in the Render service dashboard, then deploy/restart the service:
+
+- `BOOTSTRAP_ADMIN_EMAIL`: a new, unused admin email
+- `BOOTSTRAP_ADMIN_NAME`: the admin display name (optional; defaults to `Administrator`)
+- `BOOTSTRAP_ADMIN_PASSWORD`: a new password of 10 to 128 characters
+
+During startup, the backend hashes the password with bcrypt and creates an admin only if that email is unused. It never changes an existing account or exposes an admin registration endpoint. The process removes these values from its own environment after attempting setup and does not log the password or hash. After the deployment logs confirm account creation, remove the bootstrap variables from Render. If setup fails because the email already belongs to a non-admin account, choose a different unused email; no record is changed.
+
+**Render Free storage limitation:** this is still local JSON storage. Render Free services do not provide persistent local disks, so users, complaints, workers, and other JSON data can be lost when the service restarts or redeploys. Keeping bootstrap variables configured may recreate the bootstrap admin after storage is reset, but it cannot restore other records. For durable application data, use a persistent disk/hosting plan or move to a separately approved persistent storage design.
+
 ## Features
 
 - Citizen registration/login, complaint creation with optional photo, tracking, status history, notifications, resolution photos and feedback
