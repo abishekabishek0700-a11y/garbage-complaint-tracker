@@ -1,0 +1,11 @@
+node_modules/
+backend/.env
+backend/storage/*.json
+backend/storage/uploads/**
+!backend/storage/uploads/complaints/.gitkeep
+!backend/storage/uploads/cleaning_evidence/.gitkeep
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.streamlit/secrets.toml
